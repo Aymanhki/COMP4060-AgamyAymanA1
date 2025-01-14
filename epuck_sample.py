@@ -28,7 +28,7 @@ def cam_bytes_to_image(mode, data, width, height):
 def epuck_test():
 
     #epuckcomm = EPuckCom("COM8", debug=False)
-    epuckcomm = EPuckIP("192.168.0.60", debug=True)
+    epuckcomm = EPuckIP("172.20.10.4", debug=True)
     if (not epuckcomm.connect()):
         print("Could not connect, quitting")
         return

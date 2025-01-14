@@ -22,21 +22,21 @@ def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_ta
     """
     epuckcomm.state.act_left_motor_speed = l_speed_steps_s
     epuckcomm.state.act_right_motor_speed = r_speed_steps_s
+    epuckcomm.state.sens_left_motor_steps = 0
+    epuckcomm.state.sens_right_motor_steps = 0
     epuckcomm.send_command()
-
+    epuckcomm.data_update()
+    time.sleep(1 / Hz)
     left_start = epuckcomm.state.sens_left_motor_steps
     right_start = epuckcomm.state.sens_right_motor_steps
-
     left_moved = 0
     right_moved = 0
     i = 0
 
-    # while abs(left_moved) < abs(l_target_steps) or abs(right_moved) < abs(r_target_steps):
-    while (i < 5):
+    while abs(left_moved) < abs(l_target_steps) or abs(right_moved) < abs(r_target_steps):
         epuckcomm.data_update()
         left_current = epuckcomm.state.sens_left_motor_steps
         right_current = epuckcomm.state.sens_right_motor_steps
-
         left_moved = left_current - left_start
         right_moved = right_current - right_start
 
@@ -48,7 +48,12 @@ def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_ta
 
         epuckcomm.send_command()
         i = i + 1
+        print(left_moved, right_moved)
         time.sleep(1 / Hz)
+
+    left_end = epuckcomm.state.sens_left_motor_steps
+    right_end = epuckcomm.state.sens_right_motor_steps
+    print(f"left end: {left_end}", f"right end: {right_end}")
 
     epuckcomm.stop_all()
     return left_moved, right_moved
@@ -80,17 +85,18 @@ if __name__ == "__main__":
     from epuck_com import EPuckCom
 
     # epuck = EPuckCom("COM16", debug=True)
-    epuck = EPuckIP("192.168.0.60", debug=True)
+    epuck = EPuckIP("172.20.10.4", debug=True)
+    epuck.enable_sensors = True
 
     if epuck.connect():
         print("Connected to e-puck!")
 
         # Example: Move forward 100 mm
-        distance_moved = move_straight(epuck, 1)
+        distance_moved = move_straight(epuck, 130, mm_speed=100)
         print(f"Moved forward {distance_moved:.2f} mm")
 
         # Example: Move backward 50 mm
-        distance_moved = move_straight(epuck, -1)
+        distance_moved = move_straight(epuck, -130, mm_speed=-100)
         print(f"Moved backward {distance_moved:.2f} mm")
 
         epuck.close()
