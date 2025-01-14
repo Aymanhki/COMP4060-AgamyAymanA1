@@ -5,7 +5,6 @@ from epuck_helper_functions import steps_to_mm
 from epuck_helper_functions import AXLE_LENGTH_MM
 import numpy as np
 
-# Task 2: Forward Kinematics for Differential Drive Robot
 def diff_drive_forward_kin(pose, left_steps, right_steps):
     """
     Compute the new pose of the robot after wheel movements using forward kinematics.
@@ -43,7 +42,7 @@ def diff_drive_forward_kin(pose, left_steps, right_steps):
 
 # Example usage
 if __name__ == "__main__":
-    # Initial pose: (x=0 mm, y=0 mm, theta=0 radians)
+    # Initial pose: (x=10 mm, y=20 mm, theta=pi/2 radians)
     initial_pose = (10, 20, np.pi/2)
 
     # Test cases
