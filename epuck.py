@@ -20,6 +20,7 @@ class EPuck(ABC):
     state = EPuckState()
 
     def __init__(self, debug=False, timeout=10):  #timeout in s
+        self.act_speaker_sound = None
         self._debug = debug
         self._timeout = timeout
 

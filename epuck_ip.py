@@ -20,17 +20,25 @@ class EPuckIP(epuck.EPuck):
     
     _isOpen = False  # IP doesn't have a clear concept of open/closed. We manage ourself and set to close on failure to push for reconnect
 
-    def __init__(self, ip, port=1000, debug=False, timeout=10): #timeout in s  
+    def __init__(self, ip, port=1000, debug=False, timeout=10): #timeout in s
         super().__init__(debug, timeout)
         self._port = port
         self._ip = ip 
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
+
     ### COMM methods
     def  _internal_connect(self):
-        self._socket.connect( (self._ip, self._port) )
-        self._isOpen = True; 
-        #self._socket.settimeout(self._timeout)
+        try:
+            self._socket.connect((self._ip, self._port))
+            self._isOpen = True
+            self._socket.settimeout(self._timeout)
+            return True
+        except Exception as e:
+            self._debug_print(f"Failed to connect: {e}")
+            self._isOpen = False
+            return False
 
     def is_connected(self):
         return self._isOpen
