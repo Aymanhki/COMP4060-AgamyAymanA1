@@ -10,6 +10,8 @@ def diff_drive_inverse_kin(distance_mm, speed_mm_s, omega_rad):
     :return: left wheel speed, right wheel speed (in steps), total_left_steps, total_right_steps
 
     """
+    angular_velocity_rad = 0
+
     if distance_mm == 0:
         # Angular velocity (rad/s) derived from speed and axle length
         angular_velocity_rad = abs(speed_mm_s) / (helper.AXLE_LENGTH_MM / 2)
@@ -24,7 +26,8 @@ def diff_drive_inverse_kin(distance_mm, speed_mm_s, omega_rad):
 
     else:
         time_s = abs(distance_mm / speed_mm_s)  # Time to travel the given distance
-        angular_velocity_rad = omega_rad / time_s if time_s != 0 else 0
+        if time_s != 0:
+            angular_velocity_rad = omega_rad / time_s
 
         left_speed_mm = speed_mm_s - (angular_velocity_rad * helper.AXLE_LENGTH_MM / 2)
         right_speed_mm = speed_mm_s + (angular_velocity_rad * helper.AXLE_LENGTH_MM / 2)

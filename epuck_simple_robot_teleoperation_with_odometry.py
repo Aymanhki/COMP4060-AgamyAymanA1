@@ -46,7 +46,19 @@ def teleoperate_robot(epuck, initial_pose=(0, 0, 0), Hz=10):
     try:
         while True:
             # Map key states to motor speeds
-            if key_states["w"]:  # Forward
+            if key_states["w"] and key_states["a"]:  # Move diagonally forward-left
+                l_speed = 300  # Slower forward for left motor
+                r_speed = 500  # Faster forward for right motor
+            elif key_states["w"] and key_states["d"]:  # Move diagonally forward-right
+                l_speed = 500  # Faster forward for left motor
+                r_speed = 300  # Slower forward for right motor
+            elif key_states["s"] and key_states["a"]:  # Move diagonally backward-left
+                l_speed = -300  # Slower backward for left motor
+                r_speed = -500  # Faster backward for right motor
+            elif key_states["s"] and key_states["d"]:  # Move diagonally backward-right
+                l_speed = -500  # Faster backward for left motor
+                r_speed = -300  # Slower backward for right motor
+            elif key_states["w"]:  # Forward
                 l_speed = r_speed = 500
             elif key_states["s"]:  # Backward
                 l_speed = r_speed = -500
