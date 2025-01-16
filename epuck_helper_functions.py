@@ -1,10 +1,10 @@
 import math
 
-# Constants (values will depend on your robot, adjust as needed)
+# Constants
 WHEEL_DIAMETER_MM = 41  # Diameter of the wheel in mm (measured with calipers)
 WHEEL_RADIUS_MM = WHEEL_DIAMETER_MM / 2
 AXLE_LENGTH_MM = 53  # Distance between the wheels (measured with calipers)
-STEPS_PER_REVOLUTION = 1000  # Motor step resolution per wheel rotation (check your robot specs)
+STEPS_PER_REVOLUTION = 1000  # Motor step resolution per wheel rotation
 
 # Helper function 1: Calculate step delta with wraparound
 # Handles counter overflow in motor step readings
