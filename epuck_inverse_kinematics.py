@@ -43,7 +43,20 @@ def diff_drive_inverse_kin(distance_mm, speed_mm_s, omega_rad):
     return left_speed_steps, right_speed_steps, left_steps, right_steps
 
 if __name__ == "__main__":
-    print(diff_drive_inverse_kin(130, 10, 0))
-    print(diff_drive_inverse_kin(130, -10, 0))
-    print(diff_drive_inverse_kin(0, 50, np.pi / 2))
-    print(diff_drive_inverse_kin(0, -50, np.pi / 2))
+    test_cases = [
+        (130, 10, 0, (75, 75, 978, 978)),
+        (130, -10, 0, (-75, -75, 978, 978)),
+        (300, 50, 0, (376, 376, 2257, 2257)),
+        (200, 70, np.pi / 4, (472, 582, 1348, 1661)),
+        (-200, 70, np.pi / 4, (472, 582, 1348, 1661)),
+        (300, -40, -np.pi * 2, (-134, -468, 1348, 1661)),
+        (0, 100, -np.pi * 2, (753, -753, 1253, -1253)),
+        (0, 50, np.pi / 2, (-376, 376, -313, 313)),
+        (0, -50, np.pi / 2, (-376, 376, -313, 313))
+    ]
+
+    for idx, (distance, speed, omega, expected) in enumerate(test_cases, 1):
+        actual = diff_drive_inverse_kin(distance, speed, omega)
+        print(f"Test Case #{idx}:")
+        print(f"Expected: {expected}")
+        print(f"Actual:   {actual}\n")
