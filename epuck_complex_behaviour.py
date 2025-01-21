@@ -6,7 +6,6 @@ from epuck_helper_functions import steps_to_mm, mm_to_steps
 from epuck_inverse_kinematics import diff_drive_inverse_kin
 from epuck_ip import EPuckIP
 
-
 # Task 1: Move the robot a specific number of motor steps
 def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps, Hz=10):
     """
@@ -23,44 +22,50 @@ def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_ta
     Returns:
         A tuple of actual steps moved: (left_steps_moved, right_steps_moved).
     """
+    # Set the target motor speeds
     epuckcomm.state.act_left_motor_speed = l_speed_steps_s
     epuckcomm.state.act_right_motor_speed = r_speed_steps_s
-    epuckcomm.state.sens_left_motor_steps = 0
-    epuckcomm.state.sens_right_motor_steps = 0
     epuckcomm.send_command()
-    epuckcomm.data_update()
+
+    # Wait briefly to allow updates
     time.sleep(1 / Hz)
+    epuckcomm.data_update()
+
+    # Record the initial motor step counts
     left_start = epuckcomm.state.sens_left_motor_steps
     right_start = epuckcomm.state.sens_right_motor_steps
+
     left_moved = 0
     right_moved = 0
-    i = 0
 
-    while abs(left_moved) < abs(left_start + l_target_steps) or abs(right_moved) < abs(left_start + r_target_steps):
+    while abs(left_moved) < abs(l_target_steps) or abs(right_moved) < abs(r_target_steps):
         epuckcomm.data_update()
         left_current = epuckcomm.state.sens_left_motor_steps
         right_current = epuckcomm.state.sens_right_motor_steps
 
+        # Calculate the relative steps moved
         left_moved = left_current - left_start
         right_moved = right_current - right_start
 
-        print(f"left moved: {left_moved}", f"left_Start: {left_start}", f"left_target_steps: {l_target_steps}")
-
+        # Stop the left motor if the target is reached
         if abs(left_moved) >= abs(l_target_steps):
             epuckcomm.state.act_left_motor_speed = 0
 
+        # Stop the right motor if the target is reached
         if abs(right_moved) >= abs(r_target_steps):
             epuckcomm.state.act_right_motor_speed = 0
 
+        # Send updated commands to the robot
         epuckcomm.send_command()
-        i = i + 1
-        print(left_moved, right_moved)
+        print(f"Left Moved: {left_moved}, Right Moved: {right_moved}")
         time.sleep(1 / Hz)
 
+    # Final motor step counts
     left_end = epuckcomm.state.sens_left_motor_steps
     right_end = epuckcomm.state.sens_right_motor_steps
-    print(f"left end: {left_end}", f"right end: {right_end}")
+    print(f"Final Left: {left_end}, Final Right: {right_end}")
 
+    # Stop all motors
     epuckcomm.stop_all()
     return left_moved, right_moved
 
@@ -73,15 +78,20 @@ def move_straight(epuckcomm, distance_mm, omega_rad, Hz=10, mm_speed=100):
     Args:
         epuckcomm: EPuck communication object (e.g., EPuckCom).
         distance_mm: Target distance in mm (negative for backward).
+        omega_rad: Angular velocity (rad).
         Hz: Control loop frequency (default: 10 Hz).
+        mm_speed: Desired speed in mm/s (default: 100 mm/s).
 
     Returns:
         The actual distance moved based on odometry readings (in mm).
     """
-    target_steps = mm_to_steps(distance_mm)
-    speed_steps_s = int(mm_to_steps(mm_speed))  # Assume 100 mm/s speed
+    # Get motor speeds and target steps from inverse kinematics
+    l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps = diff_drive_inverse_kin(
+        distance_mm, mm_speed, omega_rad
+    )
 
-    left_moved, right_moved = move_steps(epuckcomm, *(diff_drive_inverse_kin(distance_mm, mm_speed, omega_rad)), Hz)
+    # Move the robot using the calculated speeds and target steps
+    left_moved, right_moved = move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps, Hz)
 
     # Convert steps moved back to mm and return the average distance moved
     avg_steps = (left_moved + right_moved) / 2
@@ -93,24 +103,27 @@ if __name__ == "__main__":
     from epuck_com import EPuckCom
 
     # epuck = EPuckCom("COM16", debug=True)
-    epuck = EPuckIP("172.20.10.2", debug=True)
+    epuck = EPuckIP("172.20.10.4", debug=True)
     epuck.enable_sensors = True
 
     if epuck.connect():
         print("Connected to e-puck!")
+        hz2 = 10
 
         # Move forward  500mm
-        distance_moved = move_straight(epuck, 500, 0, mm_speed=100)
+        distance_moved = move_straight(epuck, 500, 0, hz2,  mm_speed=70)
         print(f"Moved forward {distance_moved:.2f} mm")
         # turns 180 facing the starting point
-        # distance_moved = move_straight(epuck, 0, np.pi, mm_speed=100)
-        # print(f"Moved forward {distance_moved:.2f} mm")
-        # # moves forward 500mm towards the starting point
-        # distance_moved = move_straight(epuck, 500, 0, mm_speed=100)
-        # print(f"Moved forward {distance_moved:.2f} mm")
-        # # turns 180 facing away.
-        # distance_moved = move_straight(epuck, 0, np.pi, mm_speed=100)
-        # print(f"Moved forward {distance_moved:.2f} mm")
+        distance_moved = move_straight(epuck, 0, np.pi, hz2, mm_speed=30)
+        print(f"Moved forward {distance_moved:.2f} mm")
+        # moves forward 500mm towards the starting point
+        distance_moved = move_straight(epuck, 500, 0, hz2, mm_speed=70)
+        print(f"Moved forward {distance_moved:.2f} mm")
+        # turns 180 facing away.
+        distance_moved = move_straight(epuck, 0, np.pi, hz2, mm_speed=30)
+        print(f"Moved forward {distance_moved:.2f} mm")
+
+
 
         epuck.close()
     else:

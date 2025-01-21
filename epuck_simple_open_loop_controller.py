@@ -4,8 +4,9 @@ import time
 from epuck_helper_functions import steps_to_mm, mm_to_steps
 from epuck_ip import EPuckIP
 
+
 # Task 1: Move the robot a specific number of motor steps
-def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps, Hz=10):
+def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps, Hz=30):
     """
     Move the robot based on motor steps.
 
@@ -20,46 +21,61 @@ def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_ta
     Returns:
         A tuple of actual steps moved: (left_steps_moved, right_steps_moved).
     """
+    # Set the target motor speeds
     epuckcomm.state.act_left_motor_speed = l_speed_steps_s
     epuckcomm.state.act_right_motor_speed = r_speed_steps_s
     epuckcomm.state.sens_left_motor_steps = 0
     epuckcomm.state.sens_right_motor_steps = 0
+
     epuckcomm.send_command()
     epuckcomm.data_update()
+
+
+    # Wait briefly to allow updates
     time.sleep(1 / Hz)
+    epuckcomm.data_update()
+
+    # Record the initial motor step counts
     left_start = epuckcomm.state.sens_left_motor_steps
     right_start = epuckcomm.state.sens_right_motor_steps
+
     left_moved = 0
     right_moved = 0
-    i = 0
 
     while abs(left_moved) < abs(l_target_steps) or abs(right_moved) < abs(r_target_steps):
         epuckcomm.data_update()
         left_current = epuckcomm.state.sens_left_motor_steps
         right_current = epuckcomm.state.sens_right_motor_steps
+
+        # Calculate the relative steps moved
         left_moved = left_current - left_start
         right_moved = right_current - right_start
 
+        # Stop the left motor if the target is reached
         if abs(left_moved) >= abs(l_target_steps):
             epuckcomm.state.act_left_motor_speed = 0
 
+        # Stop the right motor if the target is reached
         if abs(right_moved) >= abs(r_target_steps):
             epuckcomm.state.act_right_motor_speed = 0
 
+        # Send updated commands to the robot
         epuckcomm.send_command()
-        i = i + 1
-        print(left_moved, right_moved)
+        print(f"Left Moved: {left_moved}, Right Moved: {right_moved}")
         time.sleep(1 / Hz)
 
+    # Final motor step counts
     left_end = epuckcomm.state.sens_left_motor_steps
     right_end = epuckcomm.state.sens_right_motor_steps
-    print(f"left end: {left_end}", f"right end: {right_end}")
+    print(f"Final Left: {left_end}, Final Right: {right_end}")
 
+    # Stop all motors
     epuckcomm.stop_all()
     return left_moved, right_moved
 
+
 # Task 1: Move the robot a specific distance in mm
-def move_straight(epuckcomm, distance_mm, Hz=10, mm_speed=100):
+def move_straight(epuckcomm, distance_mm, Hz=30, mm_speed=100):
     """
     Move the robot a specific distance in mm.
 
@@ -79,6 +95,7 @@ def move_straight(epuckcomm, distance_mm, Hz=10, mm_speed=100):
     # Convert steps moved back to mm and return the average distance moved
     avg_steps = (left_moved + right_moved) / 2
     return steps_to_mm(avg_steps)
+
 
 # Example usage
 if __name__ == "__main__":

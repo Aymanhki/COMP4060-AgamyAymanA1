@@ -11,6 +11,7 @@ from epuck_ip import EPuckIP
 # Global variables for keyboard input
 key_states = {"w": False, "s": False, "a": False, "d": False}
 
+
 # Keyboard listener thread
 def on_press(key):
     try:
@@ -19,12 +20,14 @@ def on_press(key):
     except AttributeError:
         pass
 
+
 def on_release(key):
     try:
         if key.char in key_states:
             key_states[key.char] = False
     except AttributeError:
         pass
+
 
 # Robot teleoperation with odometry
 def teleoperate_robot(epuck, initial_pose=(0, 0, 0), Hz=10):
@@ -100,6 +103,7 @@ def teleoperate_robot(epuck, initial_pose=(0, 0, 0), Hz=10):
     except KeyboardInterrupt:
         print("Exiting teleoperation.")
         epuck.stop_all()
+
 
 # Main program
 if __name__ == "__main__":
