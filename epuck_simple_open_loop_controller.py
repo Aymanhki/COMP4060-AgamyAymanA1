@@ -4,8 +4,9 @@ import time
 from epuck_helper_functions import steps_to_mm, mm_to_steps
 from epuck_ip import EPuckIP
 
+
 # Task 1: Move the robot a specific number of motor steps
-def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps, Hz=10):
+def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_target_steps, Hz=30):
     """
     Move the robot based on motor steps.
 
@@ -23,7 +24,12 @@ def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_ta
     # Set the target motor speeds
     epuckcomm.state.act_left_motor_speed = l_speed_steps_s
     epuckcomm.state.act_right_motor_speed = r_speed_steps_s
+    epuckcomm.state.sens_left_motor_steps = 0
+    epuckcomm.state.sens_right_motor_steps = 0
+
     epuckcomm.send_command()
+    epuckcomm.data_update()
+
 
     # Wait briefly to allow updates
     time.sleep(1 / Hz)
@@ -67,8 +73,9 @@ def move_steps(epuckcomm, l_speed_steps_s, r_speed_steps_s, l_target_steps, r_ta
     epuckcomm.stop_all()
     return left_moved, right_moved
 
+
 # Task 1: Move the robot a specific distance in mm
-def move_straight(epuckcomm, distance_mm, Hz=10, mm_speed=100):
+def move_straight(epuckcomm, distance_mm, Hz=30, mm_speed=100):
     """
     Move the robot a specific distance in mm.
 
@@ -89,12 +96,13 @@ def move_straight(epuckcomm, distance_mm, Hz=10, mm_speed=100):
     avg_steps = (left_moved + right_moved) / 2
     return steps_to_mm(avg_steps)
 
+
 # Example usage
 if __name__ == "__main__":
     from epuck_com import EPuckCom
 
     # epuck = EPuckCom("COM16", debug=True)
-    epuck = EPuckIP("192.168.1.19", debug=True)
+    epuck = EPuckIP("172.20.10.4", debug=True)
     epuck.enable_sensors = True
 
     if epuck.connect():

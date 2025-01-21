@@ -103,23 +103,24 @@ if __name__ == "__main__":
     from epuck_com import EPuckCom
 
     # epuck = EPuckCom("COM16", debug=True)
-    epuck = EPuckIP("192.168.1.19", debug=True)
+    epuck = EPuckIP("172.20.10.4", debug=True)
     epuck.enable_sensors = True
 
     if epuck.connect():
         print("Connected to e-puck!")
+        hz2 = 10
 
         # Move forward  500mm
-        distance_moved = move_straight(epuck, 500, 0, mm_speed=100)
+        distance_moved = move_straight(epuck, 500, 0, hz2,  mm_speed=70)
         print(f"Moved forward {distance_moved:.2f} mm")
         # turns 180 facing the starting point
-        distance_moved = move_straight(epuck, 0, np.pi, mm_speed=100)
+        distance_moved = move_straight(epuck, 0, np.pi, hz2, mm_speed=30)
         print(f"Moved forward {distance_moved:.2f} mm")
         # moves forward 500mm towards the starting point
-        distance_moved = move_straight(epuck, 500, 0, mm_speed=100)
+        distance_moved = move_straight(epuck, 500, 0, hz2, mm_speed=70)
         print(f"Moved forward {distance_moved:.2f} mm")
         # turns 180 facing away.
-        distance_moved = move_straight(epuck, 0, np.pi, mm_speed=100)
+        distance_moved = move_straight(epuck, 0, np.pi, hz2, mm_speed=30)
         print(f"Moved forward {distance_moved:.2f} mm")
 
 

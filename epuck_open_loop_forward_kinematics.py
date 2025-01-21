@@ -5,6 +5,7 @@ from epuck_helper_functions import steps_to_mm
 from epuck_helper_functions import AXLE_LENGTH_MM
 import numpy as np
 
+
 def diff_drive_forward_kin(pose, left_steps, right_steps):
     """
     Compute the new pose of the robot after wheel movements using forward kinematics.
@@ -40,21 +41,27 @@ def diff_drive_forward_kin(pose, left_steps, right_steps):
 
     return new_x, new_y, new_theta
 
-# Example usage
-if __name__ == "__main__":
-    # Initial pose: (x=10 mm, y=20 mm, theta=pi/2 radians)
-    initial_pose = (10, 20, np.pi/2)
 
-    # Test cases
+# Example usage
+
+if __name__ == "__main__":
     test_cases = [
-        (0, 0),  # No movement
-        (1290, 1290),  # Forward
-        (-1290, -1290),  # Backward
-        (1290, -1290),  # Rotate in place (clockwise)
-        (2580, 0),  # Pivot around right wheel
+        # Each case contains initial_pose, left_steps, right_steps, and the expected result
+        ((0, 0, 0), 0, 0, (0, 0, 0)),
+        ((10, 20, 0), 1290, 1290, (178, 20, 0)),
+        ((10, 20, np.pi / 2), 1290, 1290, (10, 188, 90)),
+        ((0, 0, 0), -1290, 1290, (0, 0, 0)),
+        ((0, 0, np.pi / 2), 1290, -1290, (0, 0, 90)),
+        ((0, 0, 0), 2580, 0, (0, 0, 0)),
+        ((1000, 1000, np.pi / 2), 1290, -1290, (1000, 1000, 90)),
+        ((0, 0, np.pi / 2), 1290, 100, (62, 7, 283)),
+        ((0, 0, 0), 1991, 2075, (263, 27, 12)),
+        ((0, 0, 0), 189, 2422, (-23, 10, 312)),
+        ((0, 0, 0), 1249, 2598, (-11, 152, 188)),
     ]
 
-    for left_steps, right_steps in test_cases:
+    for initial_pose, left_steps, right_steps, expected in test_cases:
         new_pose = diff_drive_forward_kin(initial_pose, left_steps, right_steps)
         print(f"Left steps: {left_steps}, Right steps: {right_steps}")
-        print(f"New pose: x={new_pose[0]:.2f} mm, y={new_pose[1]:.2f} mm, theta={math.degrees(new_pose[2]):.2f}°\n")
+        print(f"New pose: x={new_pose[0]:.2f} mm, y={new_pose[1]:.2f} mm, theta={math.degrees(new_pose[2]):.2f}°")
+        print(f"Expected: x={expected[0]:.2f} mm, y={expected[1]:.2f} mm, theta={expected[2]:.2f}°\n")
