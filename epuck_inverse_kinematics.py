@@ -11,45 +11,38 @@ def diff_drive_inverse_kin(distance_mm, speed_mm_s, omega_rad):
     :return: left wheel speed, right wheel speed (in steps), total_left_steps, total_right_steps
 
     """
+    angular_velocity_rad = 0
     left_distance_mm = 0
     right_distance_mm = 0
+    axle_radius = helper.AXLE_LENGTH_MM / 2
 
     if distance_mm == 0:
         # Angular velocity (rad/s) derived from speed and axle length
         angular_velocity_rad = abs(speed_mm_s) / (helper.AXLE_LENGTH_MM / 2)
 
-        left_distance_mm = -omega_rad * helper.AXLE_LENGTH_MM / 2
-        right_distance_mm = omega_rad * helper.AXLE_LENGTH_MM / 2
+        left_distance_mm = -omega_rad * axle_radius
+        right_distance_mm = omega_rad * axle_radius
 
-        if omega_rad < 0:
-            left_speed_mm = angular_velocity_rad * (helper.AXLE_LENGTH_MM / 2)
-            right_speed_mm = -angular_velocity_rad * (helper.AXLE_LENGTH_MM / 2)
-        else:
-            left_speed_mm = -angular_velocity_rad * (helper.AXLE_LENGTH_MM / 2)
-            right_speed_mm = angular_velocity_rad * (helper.AXLE_LENGTH_MM / 2)
+        left_speed_mm = -angular_velocity_rad * axle_radius if omega_rad > 0 else angular_velocity_rad * axle_radius
+        right_speed_mm = angular_velocity_rad * axle_radius if omega_rad > 0 else -angular_velocity_rad * axle_radius
 
     else:
-        time_s = abs(distance_mm / speed_mm_s)  # Time to travel the given distance
-        angular_velocity_rad = omega_rad / time_s if time_s != 0 else 0
+        time_s = abs(distance_mm / speed_mm_s)
+        if time_s != 0:
+            angular_velocity_rad = omega_rad / time_s
 
-        left_speed_mm = speed_mm_s - (angular_velocity_rad * helper.AXLE_LENGTH_MM / 2)
-        right_speed_mm = speed_mm_s + (angular_velocity_rad * helper.AXLE_LENGTH_MM / 2)
+        omega_axle_half = omega_rad * axle_radius
+        distance_abs = abs(distance_mm)
 
-        if distance_mm < 0:
-            distance_mm = abs(distance_mm)
+        left_speed_mm = speed_mm_s - angular_velocity_rad * axle_radius
+        right_speed_mm = speed_mm_s + angular_velocity_rad * axle_radius
 
-        if omega_rad < 0:
-            left_distance_mm = distance_mm + (omega_rad * helper.AXLE_LENGTH_MM / 2)
-            right_distance_mm = distance_mm - (omega_rad * helper.AXLE_LENGTH_MM / 2)
-        else:
-            left_distance_mm = distance_mm - (omega_rad * helper.AXLE_LENGTH_MM / 2)
-            right_distance_mm = distance_mm + (omega_rad * helper.AXLE_LENGTH_MM / 2)
+        left_distance_mm = distance_abs - omega_axle_half if omega_rad >= 0 else distance_abs + omega_axle_half
+        right_distance_mm = distance_abs + omega_axle_half if omega_rad >= 0 else distance_abs - omega_axle_half
 
-    # Convert speeds to steps/s
     left_speed_steps = helper.mm_to_steps(left_speed_mm)
     right_speed_steps = helper.mm_to_steps(right_speed_mm)
 
-    # Convert distances to total steps
     left_steps = helper.mm_to_steps(left_distance_mm)
     right_steps = helper.mm_to_steps(right_distance_mm)
 
